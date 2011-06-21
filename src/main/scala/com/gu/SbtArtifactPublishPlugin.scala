@@ -22,10 +22,22 @@ object SbtArtifactPublishPlugin extends Plugin {
   }
 
   val defaultSettings: Seq[Project.Setting[_]] = Seq(
-    sourcefiles := Nil,
+    sourcefiles <<= deployLibFiles,
 		artifactPublishPath <<= (target){ (target) => target / "dist" / "artifacts.zip"},
-    publishArtifacts <<= (sourcefiles, artifactPublishPath) map {publishArtifactsTask}
+    publishArtifacts <<= (sourcefiles, artifactPublishPath) map {publishArtifactsTask},
+    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
 	)
 
+  def deployLibFiles = {
+    (managedClasspath in Compile, target) map { (cp, t) =>
+      println("classpath is:")
+      cp foreach println
 
+      val guDeployJar = cp.filter(_.data.getName.startsWith("gu-deploy-libs")).head.data
+      val deployUnpackDir = t / "deployfiles"
+      IO.unzip(guDeployJar, deployUnpackDir)
+      val files: Seq[(File, String)] = (deployUnpackDir ***) x rebase (deployUnpackDir, "deploy")
+      files
+    }
+  }
 }
