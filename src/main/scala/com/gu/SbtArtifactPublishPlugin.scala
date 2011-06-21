@@ -12,27 +12,14 @@ object SbtArtifactPublishPlugin extends Plugin {
   val publishArtifacts = TaskKey[File]("publish-artifacts")
 
 
-  def publishArtifactsTask(src: Seq[(File, String)], dest: File) = {
+  def publishArtifactsTask(src: Seq[(File, String)], dest: File, s: TaskStreams) = {
 
-    println("source >> " + src)
-    println("dest is >> " + dest)
+    s.log.info("writing deployable artifacts to: " + dest)
     IO.zip(src, dest)
-
     dest
   }
-
-  val defaultSettings: Seq[Project.Setting[_]] = Seq(
-    sourcefiles <<= deployLibFiles,
-		artifactPublishPath <<= (target){ (target) => target / "dist" / "artifacts.zip"},
-    publishArtifacts <<= (sourcefiles, artifactPublishPath) map {publishArtifactsTask},
-    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
-	)
-
   def deployLibFiles = {
     (managedClasspath in Compile, target) map { (cp, t) =>
-      println("classpath is:")
-      cp foreach println
-
       val guDeployJar = cp.filter(_.data.getName.startsWith("gu-deploy-libs")).head.data
       val deployUnpackDir = t / "deployfiles"
       IO.unzip(guDeployJar, deployUnpackDir)
@@ -40,4 +27,13 @@ object SbtArtifactPublishPlugin extends Plugin {
       files
     }
   }
+
+
+  val defaultSettings: Seq[Project.Setting[_]] = Seq(
+    sourcefiles <<= deployLibFiles,
+		artifactPublishPath <<= (target){ (target) => target / "dist" / "artifacts.zip"},
+    publishArtifacts <<= (sourcefiles, artifactPublishPath, streams) map {publishArtifactsTask},
+    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
+	)
+
 }
