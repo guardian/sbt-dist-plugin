@@ -4,7 +4,7 @@ name := "sbt-artifact-publish-plugin"
 
 organization := "com.gu"
 
-version := "1.1-SNAPSHOT"
+version := "1.2-SNAPSHOT"
 
 credentials += Credentials(file("/usr/local/bin/sbt.nexus.credentials"))
 

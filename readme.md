@@ -9,16 +9,29 @@ is typically invoked by teamcity and the archive is added in to the artifact rep
 To include the plugin:
 ----------------------
 
-1. Work out what released version you want to use by going to <https://github.com/guardian/guardian.github.com/tree/master/maven/repo-releases/com/gu/sbt-artifact-publish-plugin>
+1. Work out what released version you want to use by going to <http://nexus.gudev.gnl:8081/nexus/content/groups/public/com/gu/sbt-sbt-artifact-publish-plugin_2.8.1>
 
 2. Add the sbt-artifact-publish-plugin to your sbt build, by creating project/plugins/build.sbt that looks like:
 
-        resolvers ++= Seq(
-            "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
-            "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots"
-            )
+    resolvers ++= Seq(
+      "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
+      "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
+      "Guardian Nexus" at "http://nexus.gudev.gnl:8081/nexus/content/groups/public"
+    )
 
-        libraryDependencies += "com.gu" %% "sbt-artifact-publish-plugin" % "2.0-SNAPSHOT"
+    libraryDependencies += "com.gu" %% "sbt-artifact-publish-plugin" % "1.1"
+
+3. Decide which version of the deployment library (gu-deploy-libs) you are using by going to <http://nexus.gudev.gnl:8081/nexus/content/groups/public/com/gu/gu-deploy-libs>
+
+4. Add the deployment library as a dependency for the "artifact-publish" plugin in your root sbt build file (build.sbt), for example:
+
+    resolvers in ThisBuild ++= Seq(
+      "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
+      "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
+      "Guardian Nexus" at "http://nexus.gudev.gnl:8081/nexus/content/groups/public"
+    )
+
+    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70" % "artifact-publish"
 
 
 To configure the plugin:
