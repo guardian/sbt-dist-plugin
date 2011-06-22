@@ -7,6 +7,8 @@ import Project.Initialize
 
 object SbtArtifactPublishPlugin extends Plugin {
 
+  val publishArtifactConf = config("artifact-publish") hide
+
   lazy val assembleSourceFiles = TaskKey[Seq[(File, String)]]("assemble-source-files")
   lazy val artifactPublishPath = SettingKey[File]("artifact-publish-path")
   lazy val publishArtifacts = TaskKey[File]("publish-artifacts")
@@ -18,8 +20,9 @@ object SbtArtifactPublishPlugin extends Plugin {
     IO.zip(src, dest)
     dest
   }
+
   def deployLibFiles = {
-    (managedClasspath in Compile, target) map { (cp, t) =>
+    (managedClasspath in publishArtifacts, target) map { (cp, t) =>
       val guDeployJar = cp.filter(_.data.getName.startsWith("gu-deploy-libs")).head.data
       val deployUnpackDir = t / "deployfiles"
       IO.unzip(guDeployJar, deployUnpackDir)
@@ -30,10 +33,12 @@ object SbtArtifactPublishPlugin extends Plugin {
 
 
   val defaultSettings: Seq[Project.Setting[_]] = Seq(
+    ivyConfigurations += publishArtifactConf,
     assembleSourceFiles <<= deployLibFiles,
 		artifactPublishPath <<= (target){ (target) => target / "dist" / "artifacts.zip"},
-    publishArtifacts <<= (assembleSourceFiles, artifactPublishPath, streams) map {publishArtifactsTask},
-    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
+    managedClasspath in publishArtifacts <<= (classpathTypes, update) map { (ct, report) => Classpaths.managedJars(publishArtifactConf, ct, report) },
+    publishArtifacts <<= (assembleSourceFiles, artifactPublishPath, streams) map {publishArtifactsTask}
+   // libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
 	)
 
 }
