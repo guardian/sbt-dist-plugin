@@ -7,9 +7,9 @@ import Project.Initialize
 
 object SbtArtifactPublishPlugin extends Plugin {
 
-  val sourcefiles = TaskKey[Seq[(File, String)]]("assemble-source-files")
-  val artifactPublishPath = SettingKey[File]("artifact-publish-path")
-  val publishArtifacts = TaskKey[File]("publish-artifacts")
+  lazy val assembleSourceFiles = TaskKey[Seq[(File, String)]]("assemble-source-files")
+  lazy val artifactPublishPath = SettingKey[File]("artifact-publish-path")
+  lazy val publishArtifacts = TaskKey[File]("publish-artifacts")
 
 
   def publishArtifactsTask(src: Seq[(File, String)], dest: File, s: TaskStreams) = {
@@ -30,9 +30,9 @@ object SbtArtifactPublishPlugin extends Plugin {
 
 
   val defaultSettings: Seq[Project.Setting[_]] = Seq(
-    sourcefiles <<= deployLibFiles,
+    assembleSourceFiles <<= deployLibFiles,
 		artifactPublishPath <<= (target){ (target) => target / "dist" / "artifacts.zip"},
-    publishArtifacts <<= (sourcefiles, artifactPublishPath, streams) map {publishArtifactsTask},
+    publishArtifacts <<= (assembleSourceFiles, artifactPublishPath, streams) map {publishArtifactsTask},
     libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70"
 	)
 
