@@ -10,7 +10,7 @@ To include the plugin:
 ----------------------
 
 1. Work out what released version you want to use by going to
-<https://github.com/guardian/guardian.github.com/tree/master/maven/repo-releases/com/gu/sbt-dist-plugin>
+<https://github.com/guardian/guardian.github.com/tree/master/maven/repo-releases/com/gu/sbt-dist-plugin_2.8.1>
 
 2. Add the sbt-artifact-publish-plugin to your sbt build, by creating project/plugins/build.sbt that looks like:
 
