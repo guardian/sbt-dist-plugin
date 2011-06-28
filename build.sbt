@@ -1,10 +1,10 @@
 sbtPlugin := true
 
-name := "sbt-artifact-publish-plugin"
+name := "sbt-dist-plugin"
 
 organization := "com.gu"
 
-version := "1.2-SNAPSHOT"
+version := "1.3-SNAPSHOT"
 
 credentials += Credentials(file("/usr/local/bin/sbt.nexus.credentials"))
 

@@ -1,4 +1,4 @@
-sbt-artifact-publish-plugin
+sbt-dist-plugin
 ===========================
 
 This sbt 0.10 plugin genarates a .zip file (commonly artifacts.zip) that includes all the deployable
@@ -9,88 +9,83 @@ is typically invoked by teamcity and the archive is added in to the artifact rep
 To include the plugin:
 ----------------------
 
-1. Work out what released version you want to use by going to <http://nexus.gudev.gnl:8081/nexus/content/groups/public/com/gu/sbt-sbt-artifact-publish-plugin_2.8.1>
+1. Work out what released version you want to use by going to <...>
 
 2. Add the sbt-artifact-publish-plugin to your sbt build, by creating project/plugins/build.sbt that looks like:
 
-    resolvers ++= Seq(
-      "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
-      "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
-      "Guardian Nexus" at "http://nexus.gudev.gnl:8081/nexus/content/groups/public"
-    )
+        resolvers += "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases"
 
-    libraryDependencies += "com.gu" %% "sbt-artifact-publish-plugin" % "1.1"
+        libraryDependencies += "com.gu" %% "sbt-dist-plugin" % "1.3"
 
-3. Decide which version of the deployment library (gu-deploy-libs) you are using by going to <http://nexus.gudev.gnl:8081/nexus/content/groups/public/com/gu/gu-deploy-libs>
+3. Decide which version of the deployment library (gu-deploy-libs) you are using by going
+to <http://nexus.gudev.gnl:8081/nexus/content/repositories/releases/com/gu/gu-deploy-libs>
 
-4. Add the deployment library as a dependency for the "artifact-publish" plugin in your root sbt build file (build.sbt), for example:
+4. Add the deployment library as a dependency for the "dist" plugin in your root sbt build file (build.sbt). (Any ivy / maven
+dependency that you add to the "dist" configuration will be unzipped into the root of your artifact zip.)
 
-    resolvers in ThisBuild ++= Seq(
-      "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
-      "Guardian Github Snapshots" at "http://guardian.github.com/maven/repo-snapshots",
-      "Guardian Nexus" at "http://nexus.gudev.gnl:8081/nexus/content/groups/public"
-    )
+        resolvers in ThisBuild ++= Seq(
+          "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
+          "Guardian Internal Releases" at "http://nexus.gudev.gnl:8081/nexus/content/repositories/releases"
+        )
 
-    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70" % "artifact-publish"
+        libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70" % "dist"
 
 
-To configure the plugin:
-------------------------
+To configure the plugin
+========================
 
-you need to define 2 things to get the artifacts zip file you desire:
+For multi-module builds
+-----------------------
 
-1. The output path for the zip file. When publishing to the artifact repository this might look something like:
+For multi-module builds, where you want to include outputs from multiple projects into your artifact zip, you need to
+define 3 things to get the distribution zip file you desire:
 
-	object MyProject extends Build {
-	  lazy val root = Project(
-	    "root",
-	    file("."),
-	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtArtifactPublishPlugin.defaultSettings)
-	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
-	    .settings(SbtArtifactPublishPlugin.artifactPublishPath := artifactFileName)
-	
-	...
+1. Default settings for the dist plugin. Because not all projects want to produce a distribution file, you need to manually
+register the plugin's tasks with the project that needs it:
 
-	def artifactFileName = {
-	    file("/r2/ArtifactRepository/my-project/trunk") / ("trunk-build." + System.getProperty("build.number", "DEV")) / "artifacts.zip"
-	}
+        import com.gu._
 
-If not publishing to the artifact repository you can specify the output path in terms of the project target directory:
+        object MyProject extends Build {
+          lazy val root = Project("root", file("."),
+            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
 
-	object MyProject extends Build {
-	  lazy val root = Project(
-	    "root",
-	    file("."),
-	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtArtifactPublishPlugin.defaultSettings)
-	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
-	    .settings(SbtArtifactPublishPlugin.artifactPublishPath <<= artifactFileName)
-	
-	...
+          ...
+        }
 
-	def artifactFileName = {
-	    (target){ (target) => target / "dist" / "artifacts.zip" }
-	}
+2. The output path for the zip file. When publishing to the artifact repository this might look something like:
 
-2. The contents of the zip file. This is defined as a Seq[(File, String)], I.E a bunch of tuples with a file to include in the zip and a string declaring the path you want that file to appear in the zip.
+        import com.gu._
 
-By default the zip includes the deployment framework, you need to define all the other files by adding to the SbtArtifactPublishPlugin.sourcefile setting.
+        object MyProject extends Build {
+          lazy val root = Project("root", file("."),
+            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
+            .settings(SbtArtifactPublishPlugin.distPath := artifactFileName)
+
+         ...
+         }
+
+        def artifactFileName =
+            file("/r2/ArtifactRepository/my-project/trunk") / ("trunk-build." + System.getProperty("build.number", "DEV")) / "artifacts.zip"
+
+3. The contents of the zip file. This is defined as a Seq[(File, String)], i.e. a bunch of tuples with a file to include
+in the zip and a string declaring the path you want that file to appear in the zip.
+
+By default the zip includes the deployment framework, you need to define all the other files by adding to the
+SbtArtifactPublishPlugin.distFiles setting.
 
 To add the war file that is output by a web project (that uses the WebPlugin):
 
 	object MyProject extends Build {
-	  lazy val root = Project(
-	    "root",
-	    file("."),
+	  lazy val root = Project("root", file("."),
 	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtArtifactPublishPlugin.defaultSettings)
 	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
-	    .settings(SbtArtifactPublishPlugin.assembleSourceFiles <+= webappProject(subWebProject1, "foo/webapps/app-one.war"))
-	    .settings(SbtArtifactPublishPlugin.assembleSourceFiles <+= webappProject(subWebProject2, "foo/webapps/app-two.war"))
+	    .settings(SbtArtifactPublishPlugin.distFiles <+= webappProject(subWebProject1, "foo/webapps/app-one.war"))
+	    .settings(SbtArtifactPublishPlugin.distFiles <+= webappProject(subWebProject2, "foo/webapps/app-two.war"))
 
 	...
-
-	def webappProject(project: Project, outputPath: String) = {
-	  packageWar in (project, Compile) map { war => (war -> outputPath)}
 	}
+
+	def webappProject(project: Project, outputPath: String) = packageWar in (project, Compile) map { _ -> outputPath }
 
 To add arbitrary files within a project:
 
@@ -100,21 +95,52 @@ To add arbitrary files within a project:
 	    file("."),
 	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtArtifactPublishPlugin.defaultSettings)
 	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
-	    .settings(SbtArtifactPublishPlugin.assembleSourceFiles <++= deployScripts)
+	    .settings(SbtArtifactPublishPlugin.distFiles <++= deployScripts)
 
 	...
 
 	def deployScripts = {
-	  sourceDirectory in projectWithDeployFiles map { r =>
-	    val deployRoot = r / "main" / "deploy"
-	    val deployFiles: Seq[(File, String)] = (deployRoot ***) x rebase (deployRoot, "deploy")
-	    deployFiles
+	  sourceDirectory in projectWithDeployFiles map { src =>
+	    val deployRoot = src / "main" / "deploy"
+	    (deployRoot ***) x rebase (deployRoot, "deploy")
 	  }
 	}
+
+Consult the content api for an example of this in use.
+
+
+For single-module builds
+------------------------
+
+For single-module builds, you can define all of this stuff more concisely directly in your build.sbt file:
+
+    import com.gu._
+
+    // artifact generation stuff
+    seq(SbtDistPlugin.defaultSettings :_*)
+
+    resolvers ++= Seq(
+      "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
+      "Guardian Internal Releases" at "http://nexus.gudev.gnl:8081/nexus/content/repositories/releases"
+    )
+
+    libraryDependencies += "com.gu" % "gu-deploy-libs" % "1.70" % "dist"
+
+    distPath := file("/r2/ArtifactRepository/microapp-cache/trunk") /
+      ("trunk-build." + System.getProperty("build.number", "DEV")) / "artifacts.zip"
+
+    // include the war itself
+    distFiles <+= (packageWar in Compile) map { _ -> "microapp-cache/webapps/microapp-cache.war" }
+
+    // and include custom scripts in src/main/deploy
+    distFiles <++= (sourceDirectory in Compile) map { src => (src / "deploy" ***) x relativeTo(src) }
+
+Consult the microapp cache for an example of this in use.
+
 
 To run the plugin:
 ------------------
 
-To produce the zip file invoke the publish-artifacts target.
+To produce the zip file invoke the dist target.
 
 Typically this will only be invoked by the CI server.
