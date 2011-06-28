@@ -9,13 +9,14 @@ is typically invoked by teamcity and the archive is added in to the artifact rep
 To include the plugin:
 ----------------------
 
-1. Work out what released version you want to use by going to <...>
+1. Work out what released version you want to use by going to
+<https://github.com/guardian/guardian.github.com/tree/master/maven/repo-releases/com/gu/sbt-dist-plugin>
 
 2. Add the sbt-artifact-publish-plugin to your sbt build, by creating project/plugins/build.sbt that looks like:
 
         resolvers += "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases"
 
-        libraryDependencies += "com.gu" %% "sbt-dist-plugin" % "1.3"
+        libraryDependencies += "com.gu" %% "sbt-dist-plugin" % "<version>"
 
 3. Decide which version of the deployment library (gu-deploy-libs) you are using by going
 to <http://nexus.gudev.gnl:8081/nexus/content/repositories/releases/com/gu/gu-deploy-libs>
@@ -70,10 +71,7 @@ register the plugin's tasks with the project that needs it:
 3. The contents of the zip file. This is defined as a Seq[(File, String)], i.e. a bunch of tuples with a file to include
 in the zip and a string declaring the path you want that file to appear in the zip.
 
-By default the zip includes the deployment framework, you need to define all the other files by adding to the
-SbtArtifactPublishPlugin.distFiles setting.
-
-To add the war file that is output by a web project (that uses the WebPlugin):
+  To add the war file that is output by a web project (that uses the WebPlugin):
 
 	object MyProject extends Build {
 	  lazy val root = Project("root", file("."),
