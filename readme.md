@@ -127,7 +127,7 @@ For single-module builds, you can define all of this stuff more concisely direct
     distPath := file("/r2/ArtifactRepository/microapp-cache/trunk") /
       ("trunk-build." + System.getProperty("build.number", "DEV")) / "artifacts.zip"
 
-    // include the war itself
+    // include the war itself (this is the location you want the war to save to)
     distFiles <+= (packageWar in Compile) map { _ -> "microapp-cache/webapps/microapp-cache.war" }
 
     // and include custom scripts in src/main/deploy
