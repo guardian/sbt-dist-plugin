@@ -9,14 +9,18 @@ is typically invoked by teamcity and the archive is added in to the artifact rep
 To include the plugin:
 ----------------------
 
-1. Work out what released version you want to use by going to
-<https://github.com/guardian/guardian.github.com/tree/master/maven/repo-releases/com/gu/sbt-dist-plugin_2.8.1>
+1. Work out what released version you want to use by looking at the tags list for this repository.
 
-2. Add the sbt-artifact-publish-plugin to your sbt build, by creating project/plugins/build.sbt that looks like:
+2. Add the sbt-version-info-plugin to your sbt build, by creating project/plugins/project/plugins.scala that looks like:
 
-        resolvers += "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases"
+        import sbt._
 
-        libraryDependencies += "com.gu" %% "sbt-dist-plugin" % "<version>"
+        object Plugins extends Build {
+          lazy val plugins = Project("plugins", file("."))
+            .dependsOn(
+              uri("git://github.com/guardian/sbt-dist-plugin.git#1.0")
+            )
+        }
 
 3. Decide which version of the deployment library (gu-deploy-libs) you are using by going
 to <http://nexus.gudev.gnl:8081/nexus/content/repositories/releases/com/gu/gu-deploy-libs>

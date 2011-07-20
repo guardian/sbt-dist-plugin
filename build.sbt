@@ -4,7 +4,7 @@ name := "sbt-dist-plugin"
 
 organization := "com.gu"
 
-version := "1.4-SNAPSHOT"
+version := "1.4"
 
 // don't bother publishing javadoc
 publishArtifact in (Compile, packageDoc) := false
