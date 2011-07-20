@@ -18,7 +18,7 @@ To include the plugin:
         object Plugins extends Build {
           lazy val plugins = Project("plugins", file("."))
             .dependsOn(
-              uri("git://github.com/guardian/sbt-dist-plugin.git#1.0")
+              uri("git://github.com/guardian/sbt-dist-plugin.git#1.4")
             )
         }
 
