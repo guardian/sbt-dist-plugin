@@ -79,7 +79,7 @@ in the zip and a string declaring the path you want that file to appear in the z
 
 	object MyProject extends Build {
 	  lazy val root = Project("root", file("."),
-	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtArtifactPublishPlugin.defaultSettings)
+	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
 	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
 	    .settings(SbtArtifactPublishPlugin.distFiles <+= webappProject(subWebProject1, "foo/webapps/app-one.war"))
 	    .settings(SbtArtifactPublishPlugin.distFiles <+= webappProject(subWebProject2, "foo/webapps/app-two.war"))
