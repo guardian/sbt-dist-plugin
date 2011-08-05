@@ -33,7 +33,7 @@ object SbtDistPlugin extends Plugin {
   }
 
 
-  val defaultSettings: Seq[Project.Setting[_]] = Seq(
+  val distSettings: Seq[Project.Setting[_]] = Seq(
     ivyConfigurations += distConf,
     distFiles <<= deployLibFiles,
 		distPath <<= (target) { (target) => target / "dist" / "artifacts.zip" },
