@@ -52,7 +52,7 @@ register the plugin's tasks with the project that needs it:
 
         object MyProject extends Build {
           lazy val root = Project("root", file("."),
-            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
+            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.distSettings)
 
           ...
         }
@@ -63,7 +63,7 @@ register the plugin's tasks with the project that needs it:
 
         object MyProject extends Build {
           lazy val root = Project("root", file("."),
-            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
+            settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.distSettings)
             .settings(SbtDistPlugin.distPath := artifactFileName)
 
          ...
@@ -79,7 +79,7 @@ in the zip and a string declaring the path you want that file to appear in the z
 
 	object MyProject extends Build {
 	  lazy val root = Project("root", file("."),
-	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
+	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.distSettings)
 	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
 	    .settings(SbtDistPlugin.distFiles <+= webappProject(subWebProject1, "foo/webapps/app-one.war"))
 	    .settings(SbtDistPlugin.distFiles <+= webappProject(subWebProject2, "foo/webapps/app-two.war"))
@@ -95,7 +95,7 @@ To add arbitrary files within a project:
 	  lazy val root = Project(
 	    "root",
 	    file("."),
-	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.defaultSettings)
+	    settings = Defaults.defaultSettings ++ WebPlugin.webSettings ++ SbtDistPlugin.distSettings)
 	    .aggregate(subWebProject1, subWebProject2, projectWithDeployFiles)
 	    .settings(SbtDistPlugin.distFiles <++= deployScripts)
 
@@ -119,7 +119,7 @@ For single-module builds, you can define all of this stuff more concisely direct
     import com.gu._
 
     // artifact generation stuff
-    seq(SbtDistPlugin.defaultSettings :_*)
+    seq(SbtDistPlugin.distSettings :_*)
 
     resolvers ++= Seq(
       "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
