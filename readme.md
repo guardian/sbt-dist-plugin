@@ -1,7 +1,7 @@
 sbt-dist-plugin
 ===========================
 
-This sbt 0.10 plugin genarates a .zip file (commonly artifacts.zip) that includes all the deployable
+This sbt 0.10+ plugin genarates a .zip file (commonly artifacts.zip) that includes all the deployable
 artifacts along with the deployment scripts needed to deploy them. The task to generate the .zip archive
 is typically invoked by teamcity and the archive is added in to the artifact repository (I.E a known directory).
 
@@ -11,7 +11,7 @@ To include the plugin:
 
 1. Work out what released version you want to use by looking at the tags list for this repository.
 
-2. Add the sbt-version-info-plugin to your sbt build, by creating project/plugins/project/plugins.scala that looks like:
+2. Add the sbt-version-info-plugin to your sbt build, by creating project/project/plugins.scala that looks like:
 
         import sbt._
 
